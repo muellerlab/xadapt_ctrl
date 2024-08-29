@@ -1,0 +1,6 @@
+[submodule "py3dmath"]
+	path = py3dmath
+	url = git@github.com:muellerlab/py3dmath.git
+[submodule "pyplot3d"]
+	path = pyplot3d
+	url = git@github.com:Dz298/pyplot-3d.git
