@@ -17,9 +17,8 @@ echo "project path: $PROJECT_PATH"
 # sudo -H pip install -e .
 
 cd $PROJECT_PATH
-conda create -n xadapt_ctrl python=3.8
-conda activate xadapt_ctrl
-pip install -r requirements.txt
+conda env create -f environment.yml
+conda activate xadap
 
 python simulate.py 
 echo "Have a safe flight!"

@@ -18,7 +18,7 @@ class ModelType(Enum):
 
 
 class Model:
-    def __init__(self, base_model_path='/benchmark/base_model.onnx', adap_module_path='/benchmark/adap_module.onnx', model_rms_path='/benchmark/base_model.npz'):
+    def __init__(self, base_model_path='/benchmark/onnx/base_model.onnx', adap_module_path='/benchmark/onnx/adap_module.onnx', model_rms_path='/benchmark/normalization/base_model.npz'):
         current_path = os.path.dirname(os.path.abspath(__file__))
         self.base_model_path = current_path+base_model_path
         self.adap_module_path = current_path+adap_module_path

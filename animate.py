@@ -16,7 +16,7 @@ def animate_quadcopter_history(times, x, R,arm_length=0.3,tilt_angle=0.0):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
-    space_lim = (0, 2)
+    space_lim = (-2, 2)
     uav_plot = Uav(ax, arm_length,tilt_angle=tilt_angle) 
     def update_plot(i):
         
