@@ -19,7 +19,7 @@ class AdapLowLevelControl:
         self.state_vars = ['ori1', 'ori2', 'ori3', 'ori4', 'ori5', 'ori6', 'ori7', 'ori8', 'ori9', 'wx', 'wy', 'wz', 'prop_acc', 'cmd_wx', 'cmd_wy', 'cmd_wz', 'cmd_prop_acc']
         self.action_vars = ['act1', 'act2', 'act3', 'act4']
         
-        history_len = 400
+        history_len = 100
         act_size = len(self.action_vars)
         state_obs_size = len(self.state_vars)
         

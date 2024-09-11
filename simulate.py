@@ -27,24 +27,24 @@ endTime = 5
 #==============================================================================
 # Define the vehicle
 #==============================================================================
-mass = 0.985  # kg
-Ixx = 4e-3
-Iyy = 8e-3
-Izz = 12e-3
+mass = 0.850  # kg
+Ixx = 5e-3
+Iyy = 5e-3
+Izz = 10e-3
 Ixy = 0
 Ixz = 0
 Iyz = 0
 omegaSqrToDragTorque = np.matrix(np.diag([0, 0, 0.00014]))  # N.m/(rad/s)**2
-armLength = 0.177  # m
+armLength = 0.166  # m
 
 ##MOTORS##
 motSpeedSqrToThrust = 7.6e-6  # propeller coefficient
-motSpeedSqrToTorque = 1.1e-7  # propeller coefficient
-motInertia   = 15e-6  #inertia of all rotating parts (motor + prop) [kg.m**2]
+motSpeedSqrToTorque = 1.07e-7  # propeller coefficient
+motInertia   = 1e-6  #inertia of all rotating parts (motor + prop) [kg.m**2]
 
-motTimeConst = 0.06  # time constant with which motor's speed responds [s]
+motTimeConst = 0.001  # time constant with which motor's speed responds [s]
 motMinSpeed  = 0  #[rad/s]
-motMaxSpeed  = 950  #[rad/s]
+motMaxSpeed  = 1000  #[rad/s]
 
 #==============================================================================
 # Define the disturbance
@@ -55,12 +55,12 @@ stdDevTorqueDisturbance = 0e-3  # [N.m]
 # Define the attitude controller
 #==============================================================================
 #time constants for the angle components:
-timeConstAngleRP = 0.15  # [s]
-timeConstAngleY  = 0.5  # [s]
+timeConstAngleRP = 0.08  # [s]
+timeConstAngleY  = 0.40  # [s]
 
 #gain from angular velocities
-timeConstRatesRP = 0.05  # [s]
-timeConstRatesY  = 0.25   # [s]
+timeConstRatesRP = 0.04  # [s]
+timeConstRatesY  = 0.20   # [s]
 
 #==============================================================================
 # Define the position controller
@@ -111,7 +111,7 @@ posControl = PositionController(posCtrlNatFreq, posCtrlDampingRatio)
 attController = QuadcopterAttitudeControllerNested(timeConstAngleRP, timeConstAngleY, timeConstRatesRP, timeConstRatesY)
 mixer = QuadcopterMixer(mass, inertiaMatrix, motor_pos, motSpeedSqrToTorque/motSpeedSqrToThrust)
 
-desPos = Vec3(0, 0, 1)
+desPos = Vec3(0, 0, 1.5)
 
 quadrocopter.set_position(Vec3(0, 0, 0))
 quadrocopter.set_velocity(Vec3(0, 0, 0))

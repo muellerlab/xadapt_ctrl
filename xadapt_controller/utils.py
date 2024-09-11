@@ -5,7 +5,6 @@ import onnxruntime    # to inference ONNX models, we use the ONNX Runtime
 import onnx
 from onnx import numpy_helper
 from enum import Enum
-
 import os
 
 
@@ -13,12 +12,10 @@ class ModelType(Enum):
     BASE_MODEL = 1
     ADAP_MODULE = 2
 
-# TODO: ONNX model conversion, check validity
-# TODO: Unit Test
 
 
 class Model:
-    def __init__(self, base_model_path='/benchmark/onnx/base_model.onnx', adap_module_path='/benchmark/onnx/adap_module.onnx', model_rms_path='/benchmark/normalization/base_model.npz'):
+    def __init__(self, base_model_path='/benchmark/base_model.onnx', adap_module_path='/benchmark/adap_module.onnx', model_rms_path='/benchmark/norm_RMS.npz'):
         current_path = os.path.dirname(os.path.abspath(__file__))
         self.base_model_path = current_path+base_model_path
         self.adap_module_path = current_path+adap_module_path
@@ -34,7 +31,7 @@ class Model:
                                  1.0 / 2, 1.0 / 2])[np.newaxis, :]
         self.act_size = 4
         self.state_obs_size = 17
-        self.history_len = 400
+        self.history_len = 100
 
         self.base_session = None
         self.adap_session = None
@@ -70,12 +67,7 @@ class Model:
             # Normalize for Adaptation module observations
             obs_n_norm = obs.reshape([1, -1])
 
-            # obs_current_n_normalized = obs_n_norm[:,
-            #                               :-history_len*(act_size+state_obs_size)]
-            # obs_current_normalized = (obs_current_n_normalized - self.obs_mean) / np.sqrt(self.obs_var + 1e-8)
-            # obs_n_norm[:, :-history_len *
-            #    (act_size+state_obs_size)] = obs_current_normalized
-
+            # state normalization
             obs_state_history_n_normalized = obs_n_norm[:, -self.history_len*(
                 self.act_size+self.state_obs_size):-self.history_len*self.act_size]
 
@@ -88,6 +80,17 @@ class Model:
                 obs_state_history_n_normalized - obs_state_mean) / np.sqrt(obs_state_var + 1e-8)
 
             obs_n_norm[:, -self.history_len*(self.act_size+self.state_obs_size):-self.history_len*self.act_size] = obs_state_history_normalized
+
+            # action normalization
+            obs_act_mean = np.tile(self.obs_mean[self.state_obs_size:self.state_obs_size+self.act_size], [
+                                      1, self.history_len])
+            obs_act_var = np.tile(self.obs_var[self.state_obs_size:self.state_obs_size+self.act_size], [
+                                        1, self.history_len])
+            
+            obs_act_history_n_normalized = obs_n_norm[:, -self.history_len*self.act_size:]
+            obs_act_history_normalized = (
+                obs_act_history_n_normalized - obs_act_mean) / np.sqrt(obs_act_var + 1e-8)
+            obs_n_norm[:, -self.history_len*self.act_size:] = obs_act_history_normalized
 
             obs_norm = obs_n_norm
 
