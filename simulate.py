@@ -116,39 +116,21 @@ mixer = QuadcopterMixer(mass, inertiaMatrix, motor_pos, motSpeedSqrToTorque/motS
 #==============================================================================
 
 # Define the trajectory starting state:
-pos0 = [0, 0, 1] #position
-vel0 = [0, 0, 0] #velocity
-acc0 = [0, 0, 0] #acceleration
+pos0 = np.random.uniform(-2, 2, 3)  # position
+pos0[2] += 2 # make sure it starts above the ground
+vel0 = np.random.uniform(-2,2,3) #velocity
+att0 = np.random.uniform(-1,1,4) #attitude
+att0 /= np.linalg.norm(att0) #normalize
 
 # Define the goal state:
-posf = [1, -1, 5]  # position
-velf = [2, 0, 0]  # velocity
-accf = [0, 1, 0]  # acceleration
-
-# Define the duration:
-Tf = endTime  # [s]
-
-# Define the input limits:
-fmin = 5  #[m/s**2]
-fmax = 25 #[m/s**2]
-wmax = 20 #[rad/s]
-minTimeSec = 0.02 #[s]
-
-# Define how gravity lies:
-gravity = [0,0,-9.81]
- 
-traj = quadtraj.RapidTrajectory(pos0, vel0, acc0, gravity)
-traj.set_goal_position(posf)
-traj.set_goal_velocity(velf)
-traj.set_goal_acceleration(accf)
-# Run the algorithm, and generate the trajectory.
-traj.generate(Tf)
+posf = [0, 0, 2]  # position
+velf = [0, 0, 0]  # velocity
+accf = [0, 0, 0]  # acceleration
 
 quadrocopter.set_position(Vec3(pos0))
 quadrocopter.set_velocity(Vec3(vel0))
-quadrocopter.set_attitude(Rotation.identity())
+quadrocopter.set_attitude(Rotation(att0[0], att0[1], att0[2], att0[3]))
     
-
 #start at equilibrium rates:
 quadrocopter._omega = Vec3(0,0,0)
 
@@ -163,7 +145,6 @@ index = 0
 t = 0
 
 posHistory       = np.zeros([numSteps,3])
-desPosHistory    = np.zeros([numSteps,3])
 velHistory       = np.zeros([numSteps,3])
 angVelHistory    = np.zeros([numSteps,3])
 attHistory       = np.zeros([numSteps,3])
@@ -173,8 +154,7 @@ times            = np.zeros([numSteps,1])
 
 while index < numSteps:
     #define commands:
-    desPosHistory[index,:] = traj.get_position(t)
-    accDes = posControl.get_acceleration_command(Vec3(traj.get_position(t)), Vec3(traj.get_velocity(t)), Vec3(traj.get_acceleration(t)),
+    accDes = posControl.get_acceleration_command(Vec3(posf), Vec3(velf), Vec3(accf),
                                                  quadrocopter._pos, quadrocopter._vel)
     if disablePositionControl:
         accDes *= 0 #disable position control
@@ -224,9 +204,9 @@ fig, ax = plt.subplots(5,1, sharex=True)
 ax[0].plot(times, posHistory[:,0], label='x')
 ax[0].plot(times, posHistory[:,1], label='y')
 ax[0].plot(times, posHistory[:,2], label='z')
-ax[0].plot(times, desPosHistory[:,0], ':')
-ax[0].plot(times, desPosHistory[:,1], ':')
-ax[0].plot(times, desPosHistory[:,2], ':')
+ax[0].plot(times, np.ones_like(times)*posf[0], '--', color='C0')
+ax[0].plot(times, np.ones_like(times)*posf[1], '--', color='C1')
+ax[0].plot(times, np.ones_like(times)*posf[2], '--', color='C2')
 ax[1].plot(times, velHistory)
 ax[2].plot(times, attHistory[:,0]*180/np.pi, label='Y')
 ax[2].plot(times, attHistory[:,1]*180/np.pi, label='P')
@@ -250,9 +230,6 @@ ax[0].legend()
 ax[2].legend()
 ax[3].legend()
 
-# Calculate RMSE for position and velocity
-pos_rmse = np.sqrt(np.mean((posHistory - desPosHistory)**2, axis=0))    
-print(f"Position RMSE: x={pos_rmse[0]:.4f}, y={pos_rmse[1]:.4f}, z={pos_rmse[2]:.4f}")
 plt.show()
 
 data_dict = {
