@@ -16,7 +16,8 @@ def animate_quadcopter_history(times, x, R,arm_length=0.3,tilt_angle=0.0):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
-    space_lim = (-2, 2)
+    horiz_lim = (-2,2)
+    verti_lim = (0,6)
     uav_plot = Uav(ax, arm_length,tilt_angle=tilt_angle) 
     def update_plot(i):
         
@@ -28,9 +29,9 @@ def animate_quadcopter_history(times, x, R,arm_length=0.3,tilt_angle=0.0):
         # a different axis frame configuration than the
         # one matplotlib uses.
         
-        ax.set_xlim(space_lim)
-        ax.set_ylim(space_lim)
-        ax.set_zlim((0, space_lim[1]))
+        ax.set_xlim(horiz_lim)
+        ax.set_ylim(horiz_lim)
+        ax.set_zlim(verti_lim)
         ax.set_xlabel("X")
         ax.set_ylabel("Y")
         ax.set_zlabel("Z")

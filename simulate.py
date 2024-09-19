@@ -14,6 +14,7 @@ from xadapt_controller.utils import QuadState,Model
 from xadapt_controller.controller import AdapLowLevelControl
 from pyplot3d.utils import ypr_to_R
 from animate import animate_quadcopter_history
+import RapidQuadrocopterTrajectories.Python.quadrocoptertrajectory as quadtraj 
 import pandas as pd
 
 np.random.seed(0)
@@ -80,7 +81,6 @@ cur_state = QuadState()
 # can be gained directly from motor datasheet without measurements from the experiments.
 low_level_controller.set_max_motor_spd(motMaxSpeed)
 
-
 #==============================================================================
 # Compute all things:
 #==============================================================================
@@ -111,11 +111,41 @@ posControl = PositionController(posCtrlNatFreq, posCtrlDampingRatio)
 attController = QuadcopterAttitudeControllerNested(timeConstAngleRP, timeConstAngleY, timeConstRatesRP, timeConstRatesY)
 mixer = QuadcopterMixer(mass, inertiaMatrix, motor_pos, motSpeedSqrToTorque/motSpeedSqrToThrust)
 
-desPos = Vec3(0, 0, 1.5)
+#==============================================================================
+# Define the trajectory
+#==============================================================================
 
-quadrocopter.set_position(Vec3(0, 0, 0))
-quadrocopter.set_velocity(Vec3(0, 0, 0))
+# Define the trajectory starting state:
+pos0 = [0, 0, 1] #position
+vel0 = [0, 0, 0] #velocity
+acc0 = [0, 0, 0] #acceleration
 
+# Define the goal state:
+posf = [1, -1, 5]  # position
+velf = [2, 0, 0]  # velocity
+accf = [0, 1, 0]  # acceleration
+
+# Define the duration:
+Tf = endTime  # [s]
+
+# Define the input limits:
+fmin = 5  #[m/s**2]
+fmax = 25 #[m/s**2]
+wmax = 20 #[rad/s]
+minTimeSec = 0.02 #[s]
+
+# Define how gravity lies:
+gravity = [0,0,-9.81]
+ 
+traj = quadtraj.RapidTrajectory(pos0, vel0, acc0, gravity)
+traj.set_goal_position(posf)
+traj.set_goal_velocity(velf)
+traj.set_goal_acceleration(accf)
+# Run the algorithm, and generate the trajectory.
+traj.generate(Tf)
+
+quadrocopter.set_position(Vec3(pos0))
+quadrocopter.set_velocity(Vec3(vel0))
 quadrocopter.set_attitude(Rotation.identity())
     
 
@@ -133,6 +163,7 @@ index = 0
 t = 0
 
 posHistory       = np.zeros([numSteps,3])
+desPosHistory    = np.zeros([numSteps,3])
 velHistory       = np.zeros([numSteps,3])
 angVelHistory    = np.zeros([numSteps,3])
 attHistory       = np.zeros([numSteps,3])
@@ -142,7 +173,9 @@ times            = np.zeros([numSteps,1])
 
 while index < numSteps:
     #define commands:
-    accDes = posControl.get_acceleration_command(desPos, quadrocopter._pos, quadrocopter._vel)
+    desPosHistory[index,:] = traj.get_position(t)
+    accDes = posControl.get_acceleration_command(Vec3(traj.get_position(t)), Vec3(traj.get_velocity(t)), Vec3(traj.get_acceleration(t)),
+                                                 quadrocopter._pos, quadrocopter._vel)
     if disablePositionControl:
         accDes *= 0 #disable position control
         
@@ -191,7 +224,9 @@ fig, ax = plt.subplots(5,1, sharex=True)
 ax[0].plot(times, posHistory[:,0], label='x')
 ax[0].plot(times, posHistory[:,1], label='y')
 ax[0].plot(times, posHistory[:,2], label='z')
-ax[0].plot([0, endTime], [desPos.to_list(), desPos.to_list()],':')
+ax[0].plot(times, desPosHistory[:,0], ':')
+ax[0].plot(times, desPosHistory[:,1], ':')
+ax[0].plot(times, desPosHistory[:,2], ':')
 ax[1].plot(times, velHistory)
 ax[2].plot(times, attHistory[:,0]*180/np.pi, label='Y')
 ax[2].plot(times, attHistory[:,1]*180/np.pi, label='P')
@@ -201,7 +236,6 @@ ax[3].plot(times, angVelHistory[:,1], label='q')
 ax[3].plot(times, angVelHistory[:,2], label='r')
 ax[4].plot(times, inputHistory)
 ax[4].plot(times, inputHistory)
-ax[4].plot(times, motForcesHistory,':')
 
 ax[-1].set_xlabel('Time [s]')
 
@@ -216,8 +250,9 @@ ax[0].legend()
 ax[2].legend()
 ax[3].legend()
 
-print('Ang vel: ',angVelHistory[-1,:])
-print('Motor speeds: ',quadrocopter.get_motor_speeds())
+# Calculate RMSE for position and velocity
+pos_rmse = np.sqrt(np.mean((posHistory - desPosHistory)**2, axis=0))    
+print(f"Position RMSE: x={pos_rmse[0]:.4f}, y={pos_rmse[1]:.4f}, z={pos_rmse[2]:.4f}")
 plt.show()
 
 data_dict = {

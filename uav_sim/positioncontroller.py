@@ -10,6 +10,8 @@ class PositionController:
         self._natFreq = natFreq
         self._dampingRatio = dampingRatio
         
-        
-    def get_acceleration_command(self, desPos, curPos, curVel):
-        return -2*self._dampingRatio*self._natFreq*curVel - self._natFreq**2*(curPos - desPos)
+    
+    def get_acceleration_command(self, desPos, desVel, desAcc, curPos, curVel):
+        return (desPos - curPos) * self._natFreq**2 \
+            + (desVel - curVel) * 2 * self._natFreq * self._dampingRatio \
+            + desAcc

@@ -4,3 +4,6 @@
 [submodule "pyplot3d"]
 	path = pyplot3d
 	url = git@github.com:Dz298/pyplot-3d.git
+[submodule "RapidQuadrocopterTrajectories"]
+	path = RapidQuadrocopterTrajectories
+	url = git@github.com:markwmuller/RapidQuadrocopterTrajectories.git
