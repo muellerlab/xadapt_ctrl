@@ -1,6 +1,5 @@
-# Learning to Adapt across Quadcopters with Extreme Variations
-This repo contains the deployment code associated with the paper Learning to Adapt across Quadcopters with Extreme Variations. 
-
+# A Learning-based Quadcopter Controller with Extreme Adaptation
+This repo contains the deployment code associated with the paper A Learning-based Quadcopter Controller with Extreme Adaptation
 ### TODO: video
 
 ### TODO: Paper

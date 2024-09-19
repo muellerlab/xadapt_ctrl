@@ -10,11 +10,11 @@ fi
 PROJECT_PATH=$(pwd)
 echo "project path: $PROJECT_PATH"
 
-# Echo "Setting up the project..."
-# git submodule update --init --recursive
+Echo "Setting up the project..."
+git submodule update --init --recursive
 
-# cd py3dmath
-# sudo -H pip install -e .
+cd py3dmath
+sudo -H pip install -e .
 
 cd $PROJECT_PATH
 conda env create -f environment.yml
