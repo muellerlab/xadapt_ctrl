@@ -14,7 +14,6 @@ from xadapt_controller.utils import QuadState,Model
 from xadapt_controller.controller import AdapLowLevelControl
 from pyplot3d.utils import ypr_to_R
 from animate import animate_quadcopter_history
-import RapidQuadrocopterTrajectories.Python.quadrocoptertrajectory as quadtraj 
 import pandas as pd
 
 np.random.seed(0)

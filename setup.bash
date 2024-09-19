@@ -10,7 +10,7 @@ fi
 PROJECT_PATH=$(pwd)
 echo "project path: $PROJECT_PATH"
 
-Echo "Setting up the project..."
+echo "Setting up the project..."
 git submodule update --init --recursive
 
 cd py3dmath
